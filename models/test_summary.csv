@@ -1,0 +1,10 @@
+,Value
+Total transactions,555719
+Actual fraud,2145
+Predicted fraud,2430
+Correctly identified,1753
+Missed fraud,392
+False alarms,677
+Recall,81.72%
+Precision,72.14%
+F1-Score,0.7663

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+        }
+        h1 {
+            color: #1a1a2e;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        .model-info {
+            background: #f0f2f6;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .model-info strong {
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .endpoint:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .endpoint h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .method {
+            background: #667eea;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .method.post {
+            background: #28a745;
+        }
+        .endpoint code {
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            color: #d63384;
+        }
+        .example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        .example .comment {
+            color: #75715e;
+        }
+        .example .string {
+            color: #e6db74;
+        }
+        .example .key {
+            color: #66d9ef;
+        }
+        .example .number {
+            color: #ae81ff;
+        }
+        .features {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        .features h2 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .features ul {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.5rem;
+            list-style: none;
+        }
+        .features li {
+            padding: 0.5rem;
+        }
+        .features li::before {
+            content: "✓ ";
+            margin-right: 0.5rem;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💳 Credit Card Fraud Detection API</h1>
+        <p class="subtitle">Real-time fraud detection for credit card transactions</p>
+
+        <div class="model-info">
+            <p>Model Loaded: <strong id="modelName">{{ model_name or 'None' }}</strong></p>
+            <p style="color: #666; margin-top: 0.5rem;">Status: <span style="color: #28a745;">● Active</span></p>
+        </div>
+
+        <div class="features">
+            <h2>API Capabilities</h2>
+            <ul>
+                <li>Real-time fraud prediction</li>
+                <li>Batch transaction processing</li>
+                <li>Multiple ML models support</li>
+                <li>Feature engineering pipeline</li>
+                <li>RESTful JSON API</li>
+                <li>Threshold configuration</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-bottom: 1rem;">📡 API Endpoints</h2>
+        <div class="endpoints">
+            <div class="endpoint">
+                <h3><span class="method post">POST</span> /predict</h3>
+                <p>Predict fraud for a single transaction</p>
+                <div class="example">
+<span class="comment">// Request body</span>
+{
+  <span class="key">"amt"</span>: <span class="number">150.00</span>,
+  <span class="key">"category"</span>: <span class="string">"shopping_net"</span>,
+  <span class="key">"merchant"</span>: <span class="string">"Amazon"</span>,
+  <span class="key">"cc_num"</span>: <span class="string">"1234567890123456"</span>,
+  <span class="key">"trans_date_trans_time"</span>: <span class="string">"2024-01-15 10:30:00"</span>
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <h3><span class="method post">POST</span> /predict_batch</h3>
+                <p>Predict fraud for multiple transactions</p>
+                <div class="example">
+<span class="comment">// Request body</span>
+{
+  <span class="key">"transactions"</span>: [
+    { <span class="comment">...transaction 1...</span> },
+    { <span class="comment">...transaction 2...</span> }
+  ]
+}
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <h3><span class="method">GET</span> <code>/model_info</code></h3>
+                <p>Get information about the loaded model</p>
+            </div>
+
+            <div class="endpoint">
+                <h3><span class="method">GET</span> <code>/health</code></h3>
+                <p>Health check endpoint</p>
+            </div>
+
+            <div class="endpoint">
+                <h3><span class="method">GET</span> <code>/test</code></h3>
+                <p>Run test predictions with sample data</p>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 1rem;">🔧 Usage Examples</h2>
+        <div class="example" style="margin-bottom: 1rem;">
+<span class="comment"># Python example</span>
+<span class="key">import</span> requests
+
+url = <span class="string">"http://localhost:5000/predict"</span>
+data = {
+    <span class="key">"amt"</span>: <span class="number">250.00</span>,
+    <span class="key">"category"</span>: <span class="string">"grocery_pos"</span>,
+    <span class="key">"merchant"</span>: <span class="string">"Walmart"</span>,
+    <span class="key">"cc_num"</span>: <span class="string">"1234567890123456"</span>,
+    <span class="key">"trans_date_trans_time"</span>: <span class="string">"2024-01-15 14:30:00"</span>
+}
+
+response = requests.post(url, json=data)
+<span class="key">print</span>(response.json())
+        </div>
+
+        <div class="example">
+<span class="comment"># cURL example</span>
+curl -X POST http://localhost:5000/predict \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"amt": 150.00, "category": "shopping_net", ...}'</span>
+        </div>
+
+        <div class="footer">
+            <p>Credit Card Fraud Detection API | Built with Flask & Machine Learning</p>
+        </div>
+    </div>
+</body>
+</html>

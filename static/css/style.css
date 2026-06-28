@@ -1,0 +1,239 @@
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --bg: #0b1220;
+  --surface: #111827;
+  --surface-2: #0f172a;
+  --border: #1f2937;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: radial-gradient(circle at 20% 10%, #0f172a 0%, #0b1220 100%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  min-height: 100vh;
+  margin: 0;
+}
+
+.navbar {
+  background: rgba(17, 24, 39, 0.85);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  color: #fff;
+  font-weight: 700;
+}
+
+.navbar-brand i {
+  color: var(--primary);
+}
+
+.nav-link {
+  color: #cbd5e1;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.main-container {
+  padding: 1.75rem 0 4rem;
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  padding: 1.25rem 0;
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(6px);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border: none;
+  color: #fff;
+  border-radius: 16px 16px 0 0 !important;
+  padding: 1rem 1.25rem;
+}
+
+.form-control,
+.form-select {
+  background: #0f172a;
+  border: 1px solid #374151;
+  color: #f3f4f6;
+  border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35);
+  background: #0f172a;
+  color: #fff;
+}
+
+.form-label {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.btn-outline-light {
+  border-color: #374151;
+  color: #e5e7eb;
+  background: transparent;
+  border-radius: 10px;
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.badge-fraud {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+}
+
+.badge-normal {
+  background: rgba(22, 163, 74, 0.18);
+  color: #86efac;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+}
+
+.progress {
+  background: #1f2937;
+  border-radius: 999px;
+  height: 0.85rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  border-radius: 999px;
+}
+
+.result-box {
+  display: none;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid transparent;
+  background: var(--surface);
+}
+
+.result-box.show {
+  display: block;
+}
+
+.result-box.is-normal {
+  border-color: rgba(22, 163, 74, 0.5);
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.15), rgba(22, 163, 74, 0.05));
+}
+
+.result-box.is-fraud {
+  border-color: rgba(220, 38, 38, 0.5);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.05));
+}
+
+.hero h1 {
+  font-weight: 800;
+}
+
+.hero p.lead {
+  color: var(--muted);
+}
+
+.section-title {
+  font-weight: 600;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+}
+
+.table {
+  color: #e5e7eb;
+}
+
+.table thead th {
+  background: #0f172a;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table td,
+.table th {
+  border-color: #1f2937;
+  vertical-align: middle;
+}
+
+.metric-value {
+  font-weight: 700;
+}
+
+.empty-state {
+  color: var(--muted);
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed #374151;
+  border-radius: 16px;
+  background: #0f172a;
+}

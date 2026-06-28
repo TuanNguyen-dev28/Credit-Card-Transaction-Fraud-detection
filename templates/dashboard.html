@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Fraud Detection{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <h1 class="h3 mb-0"><i class="bi bi-graph-up me-2"></i>Model Dashboard</h1>
+        <p class="text-muted mb-0">Performance overview and model statistics</p>
+      </div>
+      <a class="btn btn-outline-light btn-sm" href="{{ url_for('index') }}">
+        <i class="bi bi-arrow-left me-1"></i>Back to Test Form
+      </a>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% elif not stats %}
+      <div class="empty-state">No dashboard data available yet.</div>
+    {% else %}
+    <div class="row g-3 mb-3">
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-receipt"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.total_transactions) }}</div>
+              <div class="text-muted small">Total Transactions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-exclamation-octagon"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.total_fraud) }}</div>
+              <div class="text-muted small">Actual Fraud Cases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-flag"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.predicted_fraud) }}</div>
+              <div class="text-muted small">Predicted as Fraud</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-check-double"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.correct_predictions) }}</div>
+              <div class="text-muted small">Correctly Identified</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-x-circle"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.missed_fraud) }}</div>
+              <div class="text-muted small">Missed Fraud</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-4">
+        <div class="stat-card">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-bell"></i></div>
+            <div>
+              <div class="metric-value">{{ "{:,}".format(stats.false_alarms) }}</div>
+              <div class="text-muted small">False Alarms</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Key Metrics</div>
+      <div class="card-body">
+        <div class="row g-3 text-center">
+          <div class="col-6 col-md-3">
+            <div class="metric-value">81.72%</div>
+            <div class="text-muted small">Recall</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value">72.14%</div>
+            <div class="text-muted small">Precision</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value">0.766</div>
+            <div class="text-muted small">F1-Score</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value">99.81%</div>
+            <div class="text-muted small">Accuracy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-robot me-2"></i>Model Information</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6"><strong>Model:</strong> SMOTE + XGBoost</div>
+          <div class="col-md-6"><strong>Features:</strong> 20 (Time, Distance, Amount, Location, etc.)</div>
+          <div class="col-md-6"><strong>Technique:</strong> SMOTE oversampling + scale_pos_weight</div>
+          <div class="col-md-6"><strong>Training Data:</strong> 1,296,675 transactions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-primary" href="{{ url_for('index') }}">
+        <i class="bi bi-search me-2"></i>Test New Transaction
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
