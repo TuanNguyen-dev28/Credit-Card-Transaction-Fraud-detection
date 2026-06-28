@@ -20,6 +20,7 @@ class FeatureEngineer:
         self.scaler: Optional[StandardScaler] = None
         self.feature_names: List[str] = []
         self.amt_stats: Optional[Dict] = None
+        self.state_fraud_rate: Optional[Dict] = None
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply all transformations to the dataframe."""
@@ -197,9 +198,15 @@ class FeatureEngineer:
             df["category_freq"] = df["category"].map(category_freq)
 
         # State risk (based on fraud rate - computed on training data)
-        if "state" in df.columns and "is_fraud" in df.columns:
-            state_fraud_rate = df.groupby("state")["is_fraud"].mean()
-            df["state_fraud_risk"] = df["state"].map(state_fraud_rate)
+        if "state" in df.columns:
+            if "is_fraud" in df.columns:
+                # Training mode: compute and save
+                state_fraud_rate = df.groupby("state")["is_fraud"].mean().to_dict()
+                self.state_fraud_rate = state_fraud_rate
+                df["state_fraud_risk"] = df["state"].map(state_fraud_rate)
+            elif self.state_fraud_rate:
+                # Inference mode: use saved state_fraud_rate
+                df["state_fraud_risk"] = df["state"].map(self.state_fraud_rate).fillna(0)
 
         return df
 
