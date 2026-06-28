@@ -279,8 +279,14 @@ class ModelTrainer:
         if name is None:
             name = self.best_model_name or "model"
 
-        model_path = self.model_dir / f"{name}.pkl"
+        # Save model as model.pkl (required by predict.py)
+        model_path = self.model_dir / "model.pkl"
         model.save(str(model_path))
+        
+        # Also save as named version
+        named_model_path = self.model_dir / f"{name}.pkl"
+        if str(model_path) != str(named_model_path):
+            model.save(str(named_model_path))
 
         # Save preprocessor and feature engineer
         import pickle

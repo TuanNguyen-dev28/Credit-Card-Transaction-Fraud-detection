@@ -157,14 +157,26 @@ class FeatureEngineer:
         # Is round amount
         df["is_round_amount"] = (df["amt"] % 1 == 0).astype(int)
 
-        # Amount bins
-        df["amt_bin"] = pd.qcut(
-            df["amt"].clip(lower=0.01),
-            q=10,
-            labels=["very_low", "low", "below_avg", "avg", "above_avg",
-                    "moderately_high", "high", "very_high", "expensive", "luxury"],
-            duplicates="drop"
-        )
+        # Amount bins - handle duplicates gracefully
+        try:
+            df["amt_bin"] = pd.qcut(
+                df["amt"].clip(lower=0.01),
+                q=10,
+                labels=["very_low", "low", "below_avg", "avg", "above_avg",
+                        "moderately_high", "high", "very_high", "expensive", "luxury"],
+                duplicates="drop"
+            )
+        except ValueError:
+            # Fallback: use pd.cut with explicit bins (ensure strictly increasing)
+            min_amt = df["amt"].min()
+            max_amt = df["amt"].max() + 0.01
+            df["amt_bin"] = pd.cut(
+                df["amt"],
+                bins=np.linspace(min_amt, max_amt, 11),
+                labels=["very_low", "low", "below_avg", "avg", "above_avg",
+                        "moderately_high", "high", "very_high", "expensive", "luxury"],
+                include_lowest=True
+            )
 
         return df
 

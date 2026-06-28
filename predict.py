@@ -124,7 +124,10 @@ def main():
 
     if args.format == "csv" or input_path.suffix == ".csv":
         print(f"Loading transactions from {input_path}...")
-        df = pd.read_csv(input_path, index_col=0)
+        df = pd.read_csv(input_path)
+        # Drop unnamed index column if exists
+        if "Unnamed: 0" in df.columns:
+            df = df.drop(columns=["Unnamed: 0"])
         transactions = df.to_dict("records")
     else:
         print(f"Loading transactions from JSON...")
