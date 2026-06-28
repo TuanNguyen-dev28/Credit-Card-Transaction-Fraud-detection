@@ -179,7 +179,7 @@ with tab1:
                 color=["#2ecc71", "#e74c3c"]
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         with col2:
             st.subheader("Transactions by Category")
@@ -196,7 +196,7 @@ with tab1:
                 yaxis_title="Count",
                 showlegend=False
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         col1, col2 = st.columns(2)
 
@@ -211,7 +211,7 @@ with tab1:
                 color_discrete_map={0: "#2ecc71", 1: "#e74c3c"}
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         with col2:
             st.subheader("Fraud Rate by Category")
@@ -228,7 +228,7 @@ with tab1:
                 yaxis_title="Fraud Rate (%)",
                 showlegend=False
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -268,7 +268,7 @@ with tab2:
             merch_long = st.number_input("Merchant Longitude", value=-73.9855, format="%.4f")
             age = st.number_input("Cardholder Age", min_value=18, max_value=100, value=35)
 
-    if st.button("🔍 Check Transaction", type="primary", use_container_width=True):
+    if st.button("🔍 Check Transaction", type="primary"):
         # Prepare transaction data
         trans_datetime = datetime.combine(trans_date, trans_time)
 
@@ -366,7 +366,7 @@ with tab2:
                 title={"text": "Fraud Risk %"}
             ))
             fig.update_layout(height=300)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         except Exception as e:
             st.error(f"Error processing transaction: {e}")
@@ -420,7 +420,7 @@ with tab3:
             )
 
         fig.update_layout(height=600, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     else:
         st.info("No training results found. Run training to see performance metrics.")
@@ -516,10 +516,10 @@ with tab4:
                 markers=True
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
             # Display table
-            st.dataframe(threshold_df, use_container_width=True)
+            st.dataframe(threshold_df, width='stretch')
 
             # Recommendations
             st.divider()
