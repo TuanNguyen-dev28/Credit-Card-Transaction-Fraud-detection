@@ -22,7 +22,7 @@ from src.evaluator import ModelEvaluator, find_optimal_threshold
 
 # Page config
 st.set_page_config(
-    page_title="Credit Card Fraud Detection",
+    page_title="Phát Hiện Gian Lận Thẻ Tín Dụng",
     page_icon="💳",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -72,10 +72,10 @@ st.markdown("""
 
 
 # Title
-st.markdown('<p class="main-header">💳 Credit Card Fraud Detection Dashboard</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-header">💳 Trang Quản Lý Phát Hiện Gian Lận Thẻ Tín Dụng</p>', unsafe_allow_html=True)
 
 # Sidebar
-st.sidebar.header("⚙️ Settings")
+st.sidebar.header("⚙️ Cài Đặt")
 
 # Load model
 @st.cache_resource
@@ -107,46 +107,44 @@ def load_model():
 model, feature_engineer, preprocessor = load_model()
 
 if model is None:
-    st.warning("⚠️ No trained model found. Please run training first.")
+    st.warning("⚠️ Chưa có model đã huấn luyện. Vui lòng chạy huấn luyện trước.")
     st.code("python main.py train")
     st.stop()
 
 # Model selection
-st.sidebar.subheader("Model Information")
+st.sidebar.subheader("Thông Tin Model")
 st.sidebar.info(f"**Model:** {getattr(model, 'name', 'Unknown')}")
 
 # Threshold slider
 threshold = st.sidebar.slider(
-    "Fraud Threshold",
+    "Ngưỡng Gian Lận",
     min_value=0.0,
     max_value=1.0,
     value=0.5,
     step=0.05,
-    help="Transactions with fraud probability above this threshold are flagged"
+    help="Giao dịch có xác suất gian lận trên ngưỡng này sẽ bị đánh dấu"
 )
 
 # Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Overview",
-    "🔍 Transaction Scanner",
-    "📈 Model Performance",
-    "📉 Threshold Analysis"
+    "📊 Tổng Quan",
+    "🔍 Kiểm Tra Giao Dịch",
+    "📈 Hiệu Suất Model",
+    "📉 Phân Tích Ngưỡng"
 ])
 
 # Tab 1: Overview
 with tab1:
-    st.header("Dataset Overview")
+    st.header("📊 Tổng Quan Dữ Liệu")
 
     # Load sample data
     try:
         train_df = pd.read_csv(
             Path(__file__).parent / "dataset" / "fraudTrain.csv",
-            index_col=0,
             nrows=10000
         )
         test_df = pd.read_csv(
             Path(__file__).parent / "dataset" / "fraudTest.csv",
-            index_col=0,
             nrows=10000
         )
         df = pd.concat([train_df, test_df], ignore_index=True)
@@ -154,15 +152,15 @@ with tab1:
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.metric("Total Transactions", f"{len(df):,}")
+            st.metric("Tổng Giao Dịch", f"{len(df):,}")
         with col2:
             fraud_count = df["is_fraud"].sum()
-            st.metric("Fraud Cases", f"{fraud_count:,}")
+            st.metric("Số Giao Dịch Gian Lận", f"{fraud_count:,}")
         with col3:
             fraud_rate = df["is_fraud"].mean() * 100
-            st.metric("Fraud Rate", f"{fraud_rate:.3f}%")
+            st.metric("Tỷ Lệ Gian Lận", f"{fraud_rate:.3f}%")
         with col4:
-            st.metric("Categories", df["category"].nunique())
+            st.metric("Số Loại", df["category"].nunique())
 
         st.divider()
 
@@ -170,11 +168,10 @@ with tab1:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("Fraud Distribution")
+            st.subheader("Phân Bố Gian Lận")
             fig = px.pie(
-                df,
-                names=["Legitimate", "Fraud"],
-                values=df["is_fraud"].map({0: len(df) - fraud_count, 1: fraud_count}),
+                names=["Hợp Lệ", "Gian Lận"],
+                values=[len(df) - fraud_count, fraud_count],
                 hole=0.4,
                 color=["#2ecc71", "#e74c3c"]
             )
@@ -182,7 +179,7 @@ with tab1:
             st.plotly_chart(fig, width='stretch')
 
         with col2:
-            st.subheader("Transactions by Category")
+            st.subheader("Giao Dịch Theo Loại")
             category_counts = df["category"].value_counts()
             fig = px.bar(
                 x=category_counts.index,
@@ -192,8 +189,8 @@ with tab1:
             )
             fig.update_layout(
                 height=400,
-                xaxis_title="Category",
-                yaxis_title="Count",
+                xaxis_title="Loại Giao Dịch",
+                yaxis_title="Số Lượng",
                 showlegend=False
             )
             st.plotly_chart(fig, width='stretch')
@@ -201,7 +198,7 @@ with tab1:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("Transaction Amount Distribution")
+            st.subheader("Phân Bố Số Tiền Giao Dịch")
             fig = px.histogram(
                 df,
                 x="amt",
@@ -214,7 +211,7 @@ with tab1:
             st.plotly_chart(fig, width='stretch')
 
         with col2:
-            st.subheader("Fraud Rate by Category")
+            st.subheader("Tỷ Lệ Gian Lận Theo Loại")
             category_fraud = df.groupby("category")["is_fraud"].mean().sort_values(ascending=False)
             fig = px.bar(
                 x=category_fraud.index,
@@ -224,51 +221,51 @@ with tab1:
             )
             fig.update_layout(
                 height=400,
-                xaxis_title="Category",
-                yaxis_title="Fraud Rate (%)",
+                xaxis_title="Loại Giao Dịch",
+                yaxis_title="Tỷ Lệ Gian Lận (%)",
                 showlegend=False
             )
             st.plotly_chart(fig, width='stretch')
 
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        st.error(f"Lỗi khi tải dữ liệu: {e}")
 
 # Tab 2: Transaction Scanner
 with tab2:
-    st.header("🔍 Transaction Scanner")
-    st.write("Enter transaction details to check for potential fraud:")
+    st.header("🔍 Kiểm Tra Giao Dịch")
+    st.write("Nhập thông tin giao dịch để kiểm tra khả năng gian lận:")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        amt = st.number_input("Transaction Amount ($)", min_value=0.01, value=100.0, step=1.0)
-        category = st.selectbox("Category", [
+        amt = st.number_input("Số Tiền Giao Dịch ($)", min_value=0.01, value=100.0, step=1.0)
+        category = st.selectbox("Loại Giao Dịch", [
             "food_dining", "gas_transport", "grocery_pos", "grocery_net",
             "health_fitness", "home", "kids_pets", "misc_net", "misc_pos",
             "personal_care", "shopping_net", "shopping_pos", "travel", "entertainment"
-        ])
-        merchant = st.text_input("Merchant Name", "Amazon")
-        cc_num = st.text_input("Card Number (last 4)", "1234")
+        ], index=10)
+        merchant = st.text_input("Tên Cửa Hàng", "Amazon")
+        cc_num = st.text_input("Số Thẻ (4 số cuối)", "1234")
 
     with col2:
-        trans_date = st.date_input("Transaction Date", datetime.now())
-        trans_time = st.time_input("Transaction Time", datetime.now().time())
-        gender = st.selectbox("Gender", ["M", "F"])
-        state = st.selectbox("State", ["NY", "CA", "TX", "FL", "PA", "IL", "OH", "GA", "NC", "MI"])
+        trans_date = st.date_input("Ngày Giao Dịch", datetime.now())
+        trans_time = st.time_input("Giờ Giao Dịch", datetime.now().time())
+        gender = st.selectbox("Giới Tính", ["M", "F"])
+        state = st.selectbox("Bang", ["NY", "CA", "TX", "FL", "PA", "IL", "OH", "GA", "NC", "MI"])
 
     # Advanced options
-    with st.expander("Advanced Options"):
+    with st.expander("Tùy Chọn Nâng Cao"):
         col1, col2 = st.columns(2)
         with col1:
-            city_pop = st.number_input("City Population", value=1000000, step=10000)
-            lat = st.number_input("Cardholder Latitude", value=40.7128, format="%.4f")
-            long = st.number_input("Cardholder Longitude", value=-74.0060, format="%.4f")
+            city_pop = st.number_input("Dân Số Thành Phố", value=1000000, step=10000)
+            lat = st.number_input("Vĩ Độ Chủ Thẻ", value=40.7128, format="%.4f")
+            long = st.number_input("Kinh Độ Chủ Thẻ", value=-74.0060, format="%.4f")
         with col2:
-            merch_lat = st.number_input("Merchant Latitude", value=40.7580, format="%.4f")
-            merch_long = st.number_input("Merchant Longitude", value=-73.9855, format="%.4f")
-            age = st.number_input("Cardholder Age", min_value=18, max_value=100, value=35)
+            merch_lat = st.number_input("Vĩ Độ Cửa Hàng", value=40.7580, format="%.4f")
+            merch_long = st.number_input("Kinh Độ Cửa Hàng", value=-73.9855, format="%.4f")
+            age = st.number_input("Tuổi Chủ Thẻ", min_value=18, max_value=100, value=35)
 
-    if st.button("🔍 Check Transaction", type="primary"):
+    if st.button("🔍 Kiểm Tra Giao Dịch", type="primary"):
         # Prepare transaction data
         trans_datetime = datetime.combine(trans_date, trans_time)
 
@@ -326,24 +323,24 @@ with tab2:
             if is_fraud:
                 st.markdown(f"""
                 <div class="fraud-alert">
-                    <h3>⚠️ FRAUD ALERT</h3>
-                    <p>This transaction has a <strong>{prob*100:.2f}%</strong> probability of being fraudulent.</p>
-                    <p><strong>Recommendation:</strong> Review and verify this transaction before approving.</p>
+                    <h3>⚠️ CẢNH BÁO GIAN LẬN</h3>
+                    <p>Giao dịch này có <strong>{prob*100:.2f}%</strong> khả năng là gian lận.</p>
+                    <p><strong>Khuyến nghị:</strong> Xem xét và xác minh giao dịch này trước khi phê duyệt.</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class="safe-transaction">
-                    <h3>✅ SAFE TRANSACTION</h3>
-                    <p>This transaction has a <strong>{(1-prob)*100:.2f}%</strong> probability of being legitimate.</p>
-                    <p><strong>Recommendation:</strong> Transaction appears normal. Safe to process.</p>
+                    <h3>✅ GIAO DỊCH AN TOÀN</h3>
+                    <p>Giao dịch này có <strong>{(1-prob)*100:.2f}%</strong> khả năng là hợp lệ.</p>
+                    <p><strong>Khuyến nghị:</strong> Giao dịch có vẻ bình thường. Có thể xử lý.</p>
                 </div>
                 """, unsafe_allow_html=True)
 
             # Progress bar visualization
-            st.write("**Risk Assessment:**")
+            st.write("**Đánh Giá Rủi Ro:**")
             progress_color = "red" if prob >= threshold else "green"
-            st.progress(prob, text=f"Fraud Probability: {prob*100:.2f}%")
+            st.progress(prob, text=f"Xác Suất Gian Lận: {prob*100:.2f}%")
 
             # Risk meter
             fig = go.Figure(go.Indicator(
@@ -363,17 +360,17 @@ with tab2:
                         "value": threshold * 100
                     }
                 },
-                title={"text": "Fraud Risk %"}
+                title={"text": "Mức Rủi Ro Gian Lận %"}
             ))
             fig.update_layout(height=300)
             st.plotly_chart(fig, width='stretch')
 
         except Exception as e:
-            st.error(f"Error processing transaction: {e}")
+            st.error(f"Lỗi khi xử lý giao dịch: {e}")
 
 # Tab 3: Model Performance
 with tab3:
-    st.header("📈 Model Performance")
+    st.header("📈 Hiệu Suất Model")
 
     # Load test results if available
     results_path = Path(__file__).parent / "saved_models" / "training_results.csv"
@@ -381,27 +378,27 @@ with tab3:
     if results_path.exists():
         results_df = pd.read_csv(results_path)
 
-        st.subheader("Model Comparison")
+        st.subheader("So Sánh Các Model")
 
         # Display metrics table
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             best_model = results_df.loc[results_df["test_f1"].idxmax()]
-            st.metric("Best Model", best_model["model"])
+            st.metric("Model Tốt Nhất", best_model["model"])
         with col2:
-            st.metric("Best F1 Score", f"{best_model['test_f1']:.4f}")
+            st.metric("F1 Score Cao Nhất", f"{best_model['test_f1']:.4f}")
         with col3:
-            st.metric("Best ROC-AUC", f"{best_model['test_roc_auc']:.4f}")
+            st.metric("ROC-AUC Cao Nhất", f"{best_model['test_roc_auc']:.4f}")
         with col4:
-            st.metric("Best Recall", f"{best_model['test_recall']:.4f}")
+            st.metric("Recall Cao Nhất", f"{best_model['test_recall']:.4f}")
 
         st.divider()
 
         # Chart comparing models
         fig = make_subplots(
             rows=2, cols=2,
-            subplot_titles=["F1 Score", "ROC-AUC", "Recall", "Precision"],
+            subplot_titles=["Điểm F1", "ROC-AUC", "Recall", "Precision"],
             specs=[[{"type": "bar"}, {"type": "bar"}],
                    [{"type": "bar"}, {"type": "bar"}]]
         )
@@ -423,33 +420,33 @@ with tab3:
         st.plotly_chart(fig, width='stretch')
 
     else:
-        st.info("No training results found. Run training to see performance metrics.")
+        st.info("Chưa có kết quả huấn luyện. Chạy huấn luyện để xem các chỉ số hiệu suất.")
 
         # Show sample metrics
-        st.subheader("Expected Metrics (from training)")
+        st.subheader("Các Chỉ Số Mong Đợi (từ huấn luyện)")
 
         metrics_placeholder = st.empty()
-        metrics_placeholder.info("Train the model first using:")
+        metrics_placeholder.info("Huấn luyện model trước bằng lệnh:")
         st.code("python main.py train", language="bash")
 
 # Tab 4: Threshold Analysis
 with tab4:
-    st.header("📉 Threshold Analysis")
-    st.write("Adjust the threshold to balance between catching fraud and false positives.")
+    st.header("📉 Phân Tích Ngưỡng")
+    st.write("Điều chỉnh ngưỡng để cân bằng giữa phát hiện gian lận và báo động sai.")
 
     # Interactive threshold analysis
     threshold_test = st.slider(
-        "Select Threshold",
+        "Chọn Ngưỡng",
         min_value=0.0,
         max_value=1.0,
         value=0.5,
         step=0.01
     )
 
-    st.write(f"### Current Threshold: {threshold_test:.2f}")
+    st.write(f"### Ngưỡng Hiện Tại: {threshold_test:.2f}")
 
     # Show metrics at different thresholds
-    st.subheader("Metrics at Different Thresholds")
+    st.subheader("Các Chỉ Số Theo Ngưỡng")
 
     thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     threshold_data = []
@@ -458,7 +455,6 @@ with tab4:
     try:
         test_df = pd.read_csv(
             Path(__file__).parent / "dataset" / "fraudTest.csv",
-            index_col=0,
             nrows=5000
         )
 
@@ -498,12 +494,12 @@ with tab4:
                 f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
 
                 threshold_data.append({
-                    "Threshold": thresh,
-                    "Precision": precision,
-                    "Recall": recall,
-                    "F1 Score": f1,
-                    "Frauds Caught": tp,
-                    "False Alarms": fp
+                    "Ngưỡng": thresh,
+                    "Precision": round(precision, 4),
+                    "Recall": round(recall, 4),
+                    "F1 Score": round(f1, 4),
+                    "Phát Hiện Gian Lận": int(tp),
+                    "Báo Động Sai": int(fp)
                 })
 
             threshold_df = pd.DataFrame(threshold_data)
@@ -511,7 +507,7 @@ with tab4:
             # Display chart
             fig = px.line(
                 threshold_df,
-                x="Threshold",
+                x="Ngưỡng",
                 y=["Precision", "Recall", "F1 Score"],
                 markers=True
             )
@@ -523,25 +519,25 @@ with tab4:
 
             # Recommendations
             st.divider()
-            st.subheader("Recommendations")
+            st.subheader("Khuyến Nghị")
 
             best_f1_idx = threshold_df["F1 Score"].idxmax()
-            best_thresh = threshold_df.loc[best_f1_idx, "Threshold"]
+            best_thresh = threshold_df.loc[best_f1_idx, "Ngưỡng"]
 
             st.success(f"""
-            **Based on F1 Score optimization:**
-            - Recommended threshold: **{best_thresh:.2f}**
-            - At this threshold, you catch **{threshold_df.loc[best_f1_idx, 'Frauds Caught']}** frauds
-            - With **{threshold_df.loc[best_f1_idx, 'False Alarms']}** false alarms
+            **Dựa trên tối ưu F1 Score:**
+            - Ngưỡng khuyến nghị: **{best_thresh:.2f}**
+            - Ở ngưỡng này, phát hiện được **{threshold_df.loc[best_f1_idx, 'Phát Hiện Gian Lận']}** giao dịch gian lận
+            - Với **{threshold_df.loc[best_f1_idx, 'Báo Động Sai']}** báo động sai
             """)
 
     except Exception as e:
-        st.error(f"Error in threshold analysis: {e}")
+        st.error(f"Lỗi khi phân tích ngưỡng: {e}")
 
 # Footer
 st.divider()
 st.markdown("""
 <div style="text-align: center; color: gray;">
-    <p>Credit Card Fraud Detection Dashboard | Built with Streamlit</p>
+    <p>Trang Quản Lý Phát Hiện Gian Lận Thẻ Tín Dụng | Xây dựng với Streamlit</p>
 </div>
 """, unsafe_allow_html=True)

@@ -10,6 +10,8 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Tuple, Any, Optional
 import json
+import mlflow
+from mlflow.models import infer_signature
 
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn.metrics import (
@@ -30,6 +32,41 @@ from src.feature_engineering import FeatureEngineer, Preprocessor, prepare_featu
 logger = logging.getLogger(__name__)
 
 
+class MLflowTracker:
+    """MLflow experiment tracking manager."""
+
+    def __init__(self, experiment_name: str = "fraud_detection", tracking_uri: str = None):
+        self.experiment_name = experiment_name
+        self.tracking_uri = tracking_uri
+
+    def setup(self):
+        """Initialize MLflow tracking."""
+        if self.tracking_uri:
+            mlflow.set_tracking_uri(self.tracking_uri)
+        mlflow.set_experiment(self.experiment_name)
+        logger.info(f"MLflow experiment '{self.experiment_name}' configured")
+
+    def start_run(self, run_name: str) -> mlflow.ActiveRun:
+        """Start a new MLflow run."""
+        return mlflow.start_run(run_name=run_name, log_system_metrics=True)
+
+    def log_params(self, params: Dict[str, Any]):
+        """Log parameters to MLflow."""
+        mlflow.log_params(params)
+
+    def log_metrics(self, metrics: Dict[str, float], step: int = None):
+        """Log metrics to MLflow."""
+        mlflow.log_metrics(metrics, step=step)
+
+    def log_model(self, model, model_name: str, signature=None):
+        """Log model to MLflow."""
+        mlflow.sklearn.log_model(model, model_name, signature=signature)
+
+    def end_run(self):
+        """End the current MLflow run."""
+        mlflow.end_run()
+
+
 class ModelTrainer:
     """Handles model training and comparison."""
 
@@ -38,12 +75,21 @@ class ModelTrainer:
         train_path: Path,
         test_path: Path,
         model_dir: Path,
-        random_state: int = 42
+        random_state: int = 42,
+        use_mlflow: bool = False,
+        mlflow_experiment: str = "fraud_detection"
     ):
         self.train_path = train_path
         self.test_path = test_path
         self.model_dir = Path(model_dir)
         self.random_state = random_state
+        self.use_mlflow = use_mlflow
+
+        # MLflow tracker
+        self.mlflow_tracker = None
+        if use_mlflow:
+            self.mlflow_tracker = MLflowTracker(experiment_name=mlflow_experiment)
+            self.mlflow_tracker.setup()
 
         # Components
         self.data_loader = DataLoader(train_path, test_path)
@@ -126,16 +172,25 @@ class ModelTrainer:
         use_smote: bool = False,
         class_weight: Optional[float] = None
     ) -> Dict[str, Any]:
-        """Train a single model."""
+        """Train a single model with optional MLflow tracking."""
         logger.info(f"\n{'='*60}")
         logger.info(f"Training {model_name}" + (" with SMOTE" if use_smote else ""))
         logger.info(f"{'='*60}")
 
         start_time = time.time()
 
+        # Start MLflow run if enabled
+        run_name = f"{model_name}" + ("_SMOTE" if use_smote else "_baseline")
+        if self.mlflow_tracker:
+            mlflow_run = self.mlflow_tracker.start_run(run_name)
+
         try:
             # Create model
             model = ModelFactory.create(model_name)
+
+            # Log model hyperparameters
+            if hasattr(model, 'config') and model.config:
+                logger.info(f"Model config: {model.config}")
 
             # Apply class weight for imbalanced data
             if class_weight and model_name in ["xgboost", "lgbm"]:
@@ -150,6 +205,18 @@ class ModelTrainer:
                 X_train, y_train = smote.fit_resample(X_train, y_train)
                 logger.info(f"After SMOTE: {X_train.shape}, fraud ratio: {y_train.mean()*100:.2f}%")
 
+            # Log data info to MLflow
+            if self.mlflow_tracker:
+                self.mlflow_tracker.log_params({
+                    f"{model_name}_model": model_name,
+                    f"{model_name}_use_smote": use_smote,
+                    f"{model_name}_class_weight": class_weight,
+                    "train_size": len(X_train),
+                    "val_size": len(self.X_val),
+                    "test_size": len(self.X_test),
+                    "n_features": X_train.shape[1]
+                })
+
             # Train
             model.fit(X_train, y_train)
 
@@ -162,6 +229,22 @@ class ModelTrainer:
             model_key = f"{model_name}" + ("_SMOTE" if use_smote else "")
             self.training_results[model_key] = metrics
 
+            # Log metrics to MLflow
+            if self.mlflow_tracker:
+                self.mlflow_tracker.log_metrics({
+                    "val_accuracy": metrics["val_metrics"]["accuracy"],
+                    "val_precision": metrics["val_metrics"]["precision"],
+                    "val_recall": metrics["val_metrics"]["recall"],
+                    "val_f1": metrics["val_metrics"]["f1"],
+                    "val_roc_auc": metrics["val_metrics"]["roc_auc"],
+                    "test_accuracy": metrics["test_metrics"]["accuracy"],
+                    "test_precision": metrics["test_metrics"]["precision"],
+                    "test_recall": metrics["test_metrics"]["recall"],
+                    "test_f1": metrics["test_metrics"]["f1"],
+                    "test_roc_auc": metrics["test_metrics"]["roc_auc"],
+                    "training_time_seconds": training_time
+                })
+
             logger.info(f"Training completed in {training_time:.2f}s")
             logger.info(f"  Val F1: {metrics['val_f1']:.4f}, ROC-AUC: {metrics['val_roc_auc']:.4f}")
             logger.info(f"  Test F1: {metrics['test_f1']:.4f}, ROC-AUC: {metrics['test_roc_auc']:.4f}")
@@ -170,7 +253,12 @@ class ModelTrainer:
 
         except Exception as e:
             logger.error(f"Error training {model_name}: {str(e)}")
+            if self.mlflow_tracker:
+                mlflow.end_run(status="FAILED")
             return {"error": str(e)}
+        finally:
+            if self.mlflow_tracker:
+                self.mlflow_tracker.end_run()
 
     def _evaluate_model(
         self,
@@ -323,7 +411,7 @@ class ModelTrainer:
         logger.info(f"Results saved to {filepath}.csv and {filepath}.json")
 
 
-def main():
+def main(use_mlflow: bool = False, mlflow_experiment: str = "fraud_detection"):
     """Main training pipeline."""
     import sys
     sys.stdout.reconfigure(encoding="utf-8")
@@ -335,12 +423,20 @@ def main():
 
     from src.config import TRAIN_DATA_PATH, TEST_DATA_PATH, MODEL_DIR
 
+    if use_mlflow:
+        logger.info("=" * 60)
+        logger.info("MLflow Tracking Enabled")
+        logger.info("Run 'mlflow ui' to view experiments at http://localhost:5000")
+        logger.info("=" * 60)
+
     # Initialize trainer
     trainer = ModelTrainer(
         train_path=TRAIN_DATA_PATH,
         test_path=TEST_DATA_PATH,
         model_dir=MODEL_DIR,
-        random_state=42
+        random_state=42,
+        use_mlflow=use_mlflow,
+        mlflow_experiment=mlflow_experiment
     )
 
     # Load data
@@ -365,6 +461,8 @@ def main():
     print(f"Test ROC-AUC: {best_metrics['test_roc_auc']:.4f}")
     print(f"Test Recall: {best_metrics['test_recall']:.4f}")
     print(f"Test Precision: {best_metrics['test_precision']:.4f}")
+    if use_mlflow:
+        print("\nView MLflow UI: mlflow ui --backend-store-uri ./mlruns")
     print("=" * 60)
 
 

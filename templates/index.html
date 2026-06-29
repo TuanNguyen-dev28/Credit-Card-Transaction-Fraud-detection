@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Card Fraud Detection API</title>
+    <title>API Phát Hiện Gian Lận Thẻ Tín Dụng</title>
     <style>
         * {
             margin: 0;
@@ -145,33 +145,33 @@
 </head>
 <body>
     <div class="container">
-        <h1>💳 Credit Card Fraud Detection API</h1>
-        <p class="subtitle">Real-time fraud detection for credit card transactions</p>
+        <h1>💳 API Phát Hiện Gian Lận Thẻ Tín Dụng</h1>
+        <p class="subtitle">Phát hiện gian lận thời gian thực cho giao dịch thẻ tín dụng</p>
 
         <div class="model-info">
-            <p>Model Loaded: <strong id="modelName">{{ model_name or 'None' }}</strong></p>
-            <p style="color: #666; margin-top: 0.5rem;">Status: <span style="color: #28a745;">● Active</span></p>
+            <p>Model Đã Tải: <strong id="modelName">{{ model_name or 'None' }}</strong></p>
+            <p style="color: #666; margin-top: 0.5rem;">Trạng Thái: <span style="color: #28a745;">● Hoạt Động</span></p>
         </div>
 
         <div class="features">
-            <h2>API Capabilities</h2>
+            <h2>Tính Năng API</h2>
             <ul>
-                <li>Real-time fraud prediction</li>
-                <li>Batch transaction processing</li>
-                <li>Multiple ML models support</li>
-                <li>Feature engineering pipeline</li>
+                <li>Dự đoán gian lận thời gian thực</li>
+                <li>Xử lý hàng loạt giao dịch</li>
+                <li>Hỗ trợ nhiều mô hình ML</li>
+                <li>Pipeline tạo đặc trưng</li>
                 <li>RESTful JSON API</li>
-                <li>Threshold configuration</li>
+                <li>Cấu hình ngưỡng linh hoạt</li>
             </ul>
         </div>
 
-        <h2 style="margin-bottom: 1rem;">📡 API Endpoints</h2>
+        <h2 style="margin-bottom: 1rem;">📡 Các Endpoint API</h2>
         <div class="endpoints">
             <div class="endpoint">
                 <h3><span class="method post">POST</span> /predict</h3>
-                <p>Predict fraud for a single transaction</p>
+                <p>Dự đoán gian lận cho một giao dịch</p>
                 <div class="example">
-<span class="comment">// Request body</span>
+<span class="comment">// Yêu cầu</span>
 {
   <span class="key">"amt"</span>: <span class="number">150.00</span>,
   <span class="key">"category"</span>: <span class="string">"shopping_net"</span>,
@@ -184,13 +184,13 @@
 
             <div class="endpoint">
                 <h3><span class="method post">POST</span> /predict_batch</h3>
-                <p>Predict fraud for multiple transactions</p>
+                <p>Dự đoán gian lận cho nhiều giao dịch</p>
                 <div class="example">
-<span class="comment">// Request body</span>
+<span class="comment">// Yêu cầu</span>
 {
   <span class="key">"transactions"</span>: [
-    { <span class="comment">...transaction 1...</span> },
-    { <span class="comment">...transaction 2...</span> }
+    { <span class="comment">...giao dịch 1...</span> },
+    { <span class="comment">...giao dịch 2...</span> }
   ]
 }
                 </div>
@@ -198,23 +198,23 @@
 
             <div class="endpoint">
                 <h3><span class="method">GET</span> <code>/model_info</code></h3>
-                <p>Get information about the loaded model</p>
+                <p>Lấy thông tin về model đã tải</p>
             </div>
 
             <div class="endpoint">
                 <h3><span class="method">GET</span> <code>/health</code></h3>
-                <p>Health check endpoint</p>
+                <p>Kiểm tra trạng thái hoạt động của API</p>
             </div>
 
             <div class="endpoint">
                 <h3><span class="method">GET</span> <code>/test</code></h3>
-                <p>Run test predictions with sample data</p>
+                <p>Chạy thử dự đoán với dữ liệu mẫu</p>
             </div>
         </div>
 
-        <h2 style="margin-bottom: 1rem;">🔧 Usage Examples</h2>
+        <h2 style="margin-bottom: 1rem;">🔧 Ví Dụ Sử Dụng</h2>
         <div class="example" style="margin-bottom: 1rem;">
-<span class="comment"># Python example</span>
+<span class="comment"># Ví dụ Python</span>
 <span class="key">import</span> requests
 
 url = <span class="string">"http://localhost:5000/predict"</span>
@@ -231,14 +231,14 @@ response = requests.post(url, json=data)
         </div>
 
         <div class="example">
-<span class="comment"># cURL example</span>
+<span class="comment"># Ví dụ cURL</span>
 curl -X POST http://localhost:5000/predict \
   -H <span class="string">"Content-Type: application/json"</span> \
   -d <span class="string">'{"amt": 150.00, "category": "shopping_net", ...}'</span>
         </div>
 
         <div class="footer">
-            <p>Credit Card Fraud Detection API | Built with Flask & Machine Learning</p>
+            <p>API Phát Hiện Gian Lận Thẻ Tín Dụng | Xây dựng với Flask & Machine Learning</p>
         </div>
     </div>
 </body>

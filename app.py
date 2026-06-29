@@ -9,8 +9,10 @@ import pickle
 import logging
 from pathlib import Path
 from datetime import datetime
+from typing import Optional, List
 
 from flask import Flask, request, jsonify, render_template
+from pydantic import BaseModel, Field, field_validator
 import numpy as np
 import pandas as pd
 
@@ -22,6 +24,92 @@ from src.feature_engineering import FeatureEngineer, Preprocessor
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# PYDANTIC VALIDATION SCHEMAS
+# =============================================================================
+
+class TransactionModel(BaseModel):
+    """Schema for single transaction validation."""
+    trans_date_trans_time: str = Field(..., description="Transaction datetime")
+    cc_num: str = Field(..., min_length=1, description="Credit card number")
+    merchant: str = Field(..., min_length=1, description="Merchant name")
+    category: str = Field(..., description="Transaction category")
+    amt: float = Field(..., gt=0, description="Transaction amount (must be > 0)")
+    first: str = Field(default="", description="First name")
+    last: str = Field(default="", description="Last name")
+    gender: str = Field(default="M", pattern="^[MF]$", description="Gender: M or F")
+    street: str = Field(default="", description="Street address")
+    city: str = Field(default="", description="City")
+    state: str = Field(default="NY", min_length=2, max_length=2, description="State code (2 letters)")
+    zip: str = Field(default="00000", description="ZIP code")
+    lat: float = Field(default=40.7128, description="Cardholder latitude")
+    long: float = Field(default=-74.0060, description="Cardholder longitude")
+    city_pop: int = Field(default=0, ge=0, description="City population")
+    job: str = Field(default="", description="Job title")
+    dob: str = Field(default="1990-01-01", description="Date of birth")
+    trans_num: str = Field(default="", description="Transaction number")
+    unix_time: int = Field(default=0, description="Unix timestamp")
+    merch_lat: float = Field(default=40.7128, description="Merchant latitude")
+    merch_long: float = Field(default=-74.0060, description="Merchant longitude")
+
+    @field_validator('state')
+    @classmethod
+    def validate_state(cls, v):
+        if len(v) != 2:
+            raise ValueError('State must be 2-letter code (e.g., NY, CA)')
+        return v.upper()
+
+    @field_validator('amt')
+    @classmethod
+    def validate_amount(cls, v):
+        if v <= 0:
+            raise ValueError('Amount must be positive')
+        if v > 1000000:
+            raise ValueError('Amount exceeds maximum allowed (1,000,000)')
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "trans_date_trans_time": "2024-01-15 10:30:00",
+                "cc_num": "1234567890123456",
+                "merchant": "Amazon",
+                "category": "shopping_net",
+                "amt": 50.0,
+                "first": "John",
+                "last": "Doe",
+                "gender": "M",
+                "state": "NY",
+                "lat": 40.7128,
+                "long": -74.0060,
+                "merch_lat": 40.7580,
+                "merch_long": -73.9855,
+                "dob": "1990-01-01"
+            }
+        }
+
+
+class BatchTransactionRequest(BaseModel):
+    """Schema for batch transaction validation."""
+    transactions: List[TransactionModel] = Field(..., min_length=1, max_length=1000)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "transactions": [
+                    {
+                        "trans_date_trans_time": "2024-01-15 10:30:00",
+                        "cc_num": "1234567890123456",
+                        "merchant": "Amazon",
+                        "category": "shopping_net",
+                        "amt": 50.0
+                    }
+                ]
+            }
+        }
+
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -111,16 +199,20 @@ def predict():
         return jsonify({"error": "Model not loaded"}), 500
 
     try:
-        data = request.get_json()
-
-        # Validate required fields
-        required = ["amt", "category", "merchant", "cc_num", "trans_date_trans_time"]
-        missing = [f for f in required if f not in data]
-        if missing:
-            return jsonify({"error": f"Missing required fields: {missing}"}), 400
+        # Validate input with Pydantic
+        try:
+            data = TransactionModel(**request.get_json())
+            data_dict = data.model_dump()
+        except Exception as e:
+            logger.warning(f"Validation error: {e}")
+            return jsonify({
+                "error": "Validation failed",
+                "details": str(e),
+                "hint": "Check required fields: amt (>0), category, merchant, cc_num, trans_date_trans_time"
+            }), 400
 
         # Preprocess
-        X = preprocess_transaction(data)
+        X = preprocess_transaction(data_dict)
 
         # Predict
         fraud_probability = float(model.predict_proba(X)[:, 1][0])
@@ -152,10 +244,18 @@ def predict_batch():
     try:
         data = request.get_json()
 
-        if "transactions" not in data:
-            return jsonify({"error": "Missing 'transactions' field"}), 400
+        # Validate input with Pydantic
+        try:
+            batch_request = BatchTransactionRequest(**data)
+            transactions = [t.model_dump() for t in batch_request.transactions]
+        except Exception as e:
+            logger.warning(f"Batch validation error: {e}")
+            return jsonify({
+                "error": "Batch validation failed",
+                "details": str(e),
+                "hint": "Ensure 'transactions' is a non-empty list with valid transaction objects"
+            }), 400
 
-        transactions = data["transactions"]
         results = []
 
         for i, trans in enumerate(transactions):

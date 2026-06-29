@@ -49,6 +49,10 @@ Examples:
                               help="Models to train")
     train_parser.add_argument("--no-smote", action="store_true",
                               help="Disable SMOTE oversampling")
+    train_parser.add_argument("--mlflow", action="store_true",
+                              help="Enable MLflow experiment tracking")
+    train_parser.add_argument("--mlflow-experiment", default="fraud_detection",
+                              help="MLflow experiment name")
 
     # API command
     api_parser = subparsers.add_parser("api", help="Start Flask API server")
@@ -83,11 +87,17 @@ Examples:
         print("CREDIT CARD FRAUD DETECTION - MODEL TRAINING")
         print("=" * 60)
 
+        if args.mlflow:
+            print("MLflow Tracking: ENABLED")
+            print("View at: mlflow ui --backend-store-uri ./mlruns")
+
         trainer = ModelTrainer(
             train_path=TRAIN_DATA_PATH,
             test_path=TEST_DATA_PATH,
             model_dir=MODEL_DIR,
-            random_state=42
+            random_state=42,
+            use_mlflow=args.mlflow,
+            mlflow_experiment=args.mlflow_experiment
         )
 
         trainer.load_and_prepare_data(sample_size=args.sample)
@@ -103,6 +113,8 @@ Examples:
         print("TRAINING COMPLETE!")
         print(f"Best Model: {best_name}")
         print(f"Test F1: {best_metrics['test_f1']:.4f}")
+        if args.mlflow:
+            print("\nView MLflow UI: mlflow ui --backend-store-uri ./mlruns")
         print("=" * 60)
 
     elif args.command == "api":
