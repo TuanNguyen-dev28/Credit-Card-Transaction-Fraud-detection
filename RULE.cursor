@@ -1,0 +1,1173 @@
+Bạn hãy đóng vai trò là Senior Machine Learning Engineer + Backend Engineer + Full Stack Developer.
+
+Tôi muốn xây dựng một hệ thống:
+
+# Vietnamese Credit Card Fraud Detection System using Anomaly Detection Algorithms
+
+
+Mục tiêu:
+
+Xây dựng hệ thống phát hiện giao dịch thẻ tín dụng bất thường bằng cách kết hợp:
+
+1. Statistical anomaly detection
+
+- Z-score
+- IQR
+
+
+2. Machine Learning anomaly detection
+
+- Isolation Forest
+- One-Class SVM
+- Local Outlier Factor (LOF)
+
+
+Dataset:
+
+Tôi có 2 file:
+
+fraudTrain.csv
+
+fraudTest.csv
+
+
+Thông tin dataset:
+
+
+fraudTrain.csv:
+
+500000 rows
+
+
+fraudTest.csv:
+
+100000 rows
+
+
+
+Columns:
+
+
+trans_date_trans_time
+
+cc_num
+
+merchant
+
+category
+
+amt
+
+first
+
+last
+
+gender
+
+street
+
+city
+
+state
+
+zip
+
+lat
+
+long
+
+city_pop
+
+job
+
+dob
+
+trans_num
+
+unix_time
+
+merch_lat
+
+merch_long
+
+is_fraud
+
+
+
+Target:
+
+
+is_fraud
+
+
+0 = Normal transaction
+
+1 = Fraud transaction
+
+
+
+====================================
+TECH STACK
+====================================
+
+
+Backend:
+
+Python 3.11
+
+FastAPI
+
+
+Machine Learning:
+
+Scikit-learn
+
+Pandas
+
+NumPy
+
+Joblib
+
+
+Database:
+
+PostgreSQL
+
+
+Frontend:
+
+React + TypeScript
+
+TailwindCSS
+
+
+Chart:
+
+Recharts
+
+
+Deployment:
+
+Docker Compose
+
+
+
+====================================
+PROJECT STRUCTURE
+====================================
+
+
+fraud-detection-system/
+
+
+backend/
+
+    app/
+
+        main.py
+
+        api/
+
+            routes.py
+
+
+        services/
+
+            fraud_service.py
+
+
+        schemas/
+
+            transaction.py
+
+
+        database/
+
+            database.py
+
+            models.py
+
+
+        utils/
+
+            logger.py
+
+
+
+    ml/
+
+
+        load_data.py
+
+
+        preprocessing.py
+
+
+        feature_engineering.py
+
+
+        train.py
+
+
+        evaluate.py
+
+
+        predict.py
+
+
+
+        models/
+
+
+            isolation_forest.py
+
+            one_class_svm.py
+
+            lof.py
+
+            statistical.py
+
+
+
+    saved_models/
+
+
+        isolation_forest.pkl
+
+        one_class_svm.pkl
+
+        lof.pkl
+
+
+
+frontend/
+
+
+    src/
+
+
+        components/
+
+        pages/
+
+        services/
+
+        charts/
+
+
+
+dataset/
+
+
+    fraudTrain.csv
+
+    fraudTest.csv
+
+
+
+notebooks/
+
+
+    EDA.ipynb
+
+
+
+docker-compose.yml
+
+
+README.md
+
+
+
+====================================
+PHASE 1
+DATA ANALYSIS
+====================================
+
+
+Tạo notebook:
+
+
+notebooks/EDA.ipynb
+
+
+Load:
+
+
+fraudTrain.csv
+
+fraudTest.csv
+
+
+
+Thực hiện:
+
+
+- Kiểm tra shape
+
+- Kiểm tra missing values
+
+- Kiểm tra duplicate
+
+- Kiểm tra datatype
+
+
+Visualize:
+
+
+1.
+
+Fraud vs Normal
+
+
+2.
+
+Transaction amount distribution
+
+
+3.
+
+Fraud theo category
+
+
+4.
+
+Fraud theo merchant
+
+
+5.
+
+Fraud theo city/state
+
+
+6.
+
+Fraud theo thời gian giao dịch
+
+
+7.
+
+Fraud theo giờ trong ngày
+
+
+8.
+
+Correlation analysis
+
+
+
+Xuất report.
+
+
+
+====================================
+PHASE 2
+FEATURE ENGINEERING
+====================================
+
+
+Tạo:
+
+feature_engineering.py
+
+
+
+Implement:
+
+
+================================
+
+1. TIME FEATURES
+
+================================
+
+
+Convert:
+
+trans_date_trans_time
+
+
+
+Create:
+
+
+transaction_hour
+
+
+transaction_day
+
+
+transaction_month
+
+
+transaction_weekday
+
+
+
+Create:
+
+
+is_night_transaction
+
+
+
+Rule:
+
+
+00:00 - 05:00 = 1
+
+
+
+================================
+
+2. CUSTOMER FEATURES
+
+================================
+
+
+From:
+
+
+dob
+
+
+
+Create:
+
+
+customer_age
+
+
+
+================================
+
+3. LOCATION FEATURES
+
+================================
+
+
+Using:
+
+
+lat
+
+long
+
+
+merch_lat
+
+merch_long
+
+
+
+Calculate:
+
+
+
+distance_customer_merchant
+
+
+
+using Haversine formula
+
+
+
+================================
+
+4. TRANSACTION FEATURES
+
+================================
+
+
+Using:
+
+
+amt
+
+
+
+Create:
+
+
+log_amount
+
+
+amount_zscore
+
+
+
+================================
+
+5. CATEGORY FEATURES
+
+================================
+
+
+Use:
+
+
+merchant
+
+category
+
+gender
+
+state
+
+job
+
+city
+
+
+
+Encoding:
+
+
+OneHotEncoder
+
+
+
+================================
+
+6. DROP COLUMNS
+
+================================
+
+
+Remove:
+
+
+cc_num
+
+first
+
+last
+
+street
+
+trans_num
+
+dob
+
+trans_date_trans_time
+
+
+
+Reason:
+
+Avoid data leakage.
+
+
+
+====================================
+PHASE 3
+STATISTICAL DETECTION
+====================================
+
+
+Create:
+
+
+statistical.py
+
+
+
+Implement:
+
+
+
+Z-score:
+
+
+Function:
+
+
+detect_zscore()
+
+
+
+Rule:
+
+
+abs(z_score) > 3
+
+
+
+Return:
+
+
+prediction
+
+anomaly_score
+
+
+
+--------------------------------
+
+
+
+IQR:
+
+
+Function:
+
+
+detect_iqr()
+
+
+
+Rule:
+
+
+value < Q1 - 1.5*IQR
+
+
+or
+
+
+value > Q3 + 1.5*IQR
+
+
+
+Return:
+
+
+prediction
+
+score
+
+
+
+====================================
+PHASE 4
+MACHINE LEARNING MODELS
+====================================
+
+
+Train:
+
+
+fraudTrain.csv
+
+
+
+Test:
+
+
+fraudTest.csv
+
+
+
+Dataset imbalance:
+
+Fraud cases are rare.
+
+
+Use:
+
+
+class_weight="balanced"
+
+where available.
+
+
+
+================================
+
+MODEL 1
+
+Isolation Forest
+
+
+File:
+
+
+isolation_forest.py
+
+
+
+Use:
+
+
+sklearn.ensemble.IsolationForest
+
+
+
+Implement:
+
+
+train()
+
+predict()
+
+save()
+
+load()
+
+
+
+Output:
+
+
+1 = normal
+
+
+-1 = anomaly
+
+
+
+================================
+
+MODEL 2
+
+One-Class SVM
+
+
+File:
+
+
+one_class_svm.py
+
+
+
+Use:
+
+
+sklearn.svm.OneClassSVM
+
+
+
+Kernel:
+
+
+rbf
+
+
+
+Implement:
+
+
+train()
+
+predict()
+
+
+
+================================
+
+MODEL 3
+
+Local Outlier Factor
+
+
+File:
+
+
+lof.py
+
+
+
+Use:
+
+
+sklearn.neighbors.LocalOutlierFactor
+
+
+
+Implement:
+
+
+train()
+
+predict()
+
+
+
+====================================
+PHASE 5
+MODEL EVALUATION
+====================================
+
+
+Create:
+
+
+evaluate.py
+
+
+
+Compare:
+
+
+Z-score
+
+IQR
+
+Isolation Forest
+
+One-Class SVM
+
+LOF
+
+
+
+Metrics:
+
+
+Precision
+
+Recall
+
+F1-score
+
+ROC-AUC
+
+Confusion Matrix
+
+
+
+Important:
+
+
+Không đánh giá bằng Accuracy vì dataset imbalance.
+
+
+
+Save:
+
+
+model_results.csv
+
+
+
+Format:
+
+
+Model
+
+Precision
+
+Recall
+
+F1
+
+ROC-AUC
+
+
+
+====================================
+PHASE 6
+FASTAPI
+====================================
+
+
+Create API:
+
+
+POST
+
+
+/api/detect
+
+
+
+Input:
+
+
+{
+
+"amt":500,
+
+"category":"shopping",
+
+"merchant":"Vietravel",
+
+"city":"Hồ Chí Minh",
+
+"state":"HCM",
+
+"lat":10.8,
+
+"long":106.6,
+
+"merch_lat":10.7,
+
+"merch_long":106.7
+
+}
+
+
+
+Process:
+
+
+1.
+
+Receive request
+
+
+2.
+
+Feature engineering
+
+
+3.
+
+Load model
+
+
+4.
+
+Predict
+
+
+5.
+
+Return result
+
+
+
+Response:
+
+
+{
+
+"prediction":"fraud",
+
+"model":"Isolation Forest",
+
+"anomaly_score":0.92
+
+}
+
+
+
+====================================
+DATABASE
+====================================
+
+
+PostgreSQL table:
+
+
+transactions
+
+
+
+Columns:
+
+
+id
+
+amount
+
+category
+
+merchant
+
+city
+
+prediction
+
+score
+
+created_at
+
+
+
+Save detection history.
+
+
+
+====================================
+PHASE 7
+REACT DASHBOARD
+====================================
+
+
+
+Create dashboard:
+
+
+Page 1:
+
+Dashboard
+
+
+
+Show:
+
+
+Total Transactions
+
+
+Fraud Transactions
+
+
+Fraud Rate
+
+
+
+Charts:
+
+
+- Fraud/Normal Pie Chart
+
+- Fraud by Category
+
+- Amount Distribution
+
+- Fraud timeline
+
+
+
+--------------------------------
+
+
+Page 2:
+
+
+Fraud Detection
+
+
+
+Form:
+
+
+Amount
+
+Category
+
+Merchant
+
+City
+
+State
+
+Latitude
+
+Longitude
+
+
+
+Button:
+
+
+Detect Fraud
+
+
+
+Show:
+
+
+NORMAL / FRAUD
+
+
+Score
+
+
+
+====================================
+PHASE 8
+DOCKER
+====================================
+
+
+
+Create:
+
+
+docker-compose.yml
+
+
+
+Services:
+
+
+backend
+
+
+frontend
+
+
+postgres
+
+
+
+Run:
+
+
+docker-compose up
+
+
+
+====================================
+CODE QUALITY
+====================================
+
+
+Requirement:
+
+
+- Clean architecture
+
+- Python type hint
+
+- Error handling
+
+- Logging
+
+- .env
+
+- README
+
+- Swagger API docs
+
+- Comment code
+
+
+
+====================================
+IMPORTANT IMPLEMENTATION RULE
+====================================
+
+
+Không tạo toàn bộ project một lần.
+
+
+Làm từng phase:
+
+
+Phase 1:
+
+Setup project
+
+Load dataset
+
+EDA
+
+
+Sau mỗi phase:
+
+
+1.
+
+Giải thích file tạo ra
+
+
+2.
+
+Đưa code hoàn chỉnh
+
+
+3.
+
+Hướng dẫn chạy
+
+
+4.
+
+Chờ tôi xác nhận trước khi sang phase tiếp theo
+
+
+Bắt đầu với Phase 1.
