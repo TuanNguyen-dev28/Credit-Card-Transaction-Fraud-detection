@@ -292,6 +292,8 @@ def prepare_features(
     if preprocessor is None:
         preprocessor = Preprocessor()
         df = preprocessor.fit_transform(df)
+    elif is_training:
+        df = preprocessor.fit_transform(df)
     else:
         df = preprocessor.transform(df)
 

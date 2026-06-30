@@ -244,14 +244,14 @@ with tab2:
             "health_fitness", "home", "kids_pets", "misc_net", "misc_pos",
             "personal_care", "shopping_net", "shopping_pos", "travel", "entertainment"
         ], index=10)
-        merchant = st.text_input("Tên Cửa Hàng", "Amazon")
+        merchant = st.text_input("Tên Cửa Hàng", "VinMart")
         cc_num = st.text_input("Số Thẻ (4 số cuối)", "1234")
 
     with col2:
         trans_date = st.date_input("Ngày Giao Dịch", datetime.now())
         trans_time = st.time_input("Giờ Giao Dịch", datetime.now().time())
         gender = st.selectbox("Giới Tính", ["M", "F"])
-        state = st.selectbox("Bang", ["NY", "CA", "TX", "FL", "PA", "IL", "OH", "GA", "NC", "MI"])
+        state = st.selectbox("Tỉnh/Thành", ["HN", "HCM", "ĐN", "HP", "CT", "KH", "TTh", "LĐ", "NA", "HD", "BN", "BD", "ĐNai", "QN", "TNg", "NĐ", "TH", "AG", "KG"], index=0)
 
     # Advanced options
     with st.expander("Tùy Chọn Nâng Cao"):

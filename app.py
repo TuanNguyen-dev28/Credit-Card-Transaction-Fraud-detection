@@ -42,10 +42,10 @@ class TransactionModel(BaseModel):
     gender: str = Field(default="M", pattern="^[MF]$", description="Gender: M or F")
     street: str = Field(default="", description="Street address")
     city: str = Field(default="", description="City")
-    state: str = Field(default="NY", min_length=2, max_length=2, description="State code (2 letters)")
-    zip: str = Field(default="00000", description="ZIP code")
-    lat: float = Field(default=40.7128, description="Cardholder latitude")
-    long: float = Field(default=-74.0060, description="Cardholder longitude")
+    state: str = Field(default="HN", min_length=2, max_length=3, description="State/Province code (e.g., HN, HCM, ĐN)")
+    zip: str = Field(default="100000", description="Postal code")
+    lat: float = Field(default=21.0285, description="Cardholder latitude (Vietnam)")
+    long: float = Field(default=105.8542, description="Cardholder longitude (Vietnam)")
     city_pop: int = Field(default=0, ge=0, description="City population")
     job: str = Field(default="", description="Job title")
     dob: str = Field(default="1990-01-01", description="Date of birth")
@@ -57,8 +57,8 @@ class TransactionModel(BaseModel):
     @field_validator('state')
     @classmethod
     def validate_state(cls, v):
-        if len(v) != 2:
-            raise ValueError('State must be 2-letter code (e.g., NY, CA)')
+        if not v or len(v) < 2:
+            raise ValueError('State must be at least 2 characters (e.g., HN, HCM, ĐN)')
         return v.upper()
 
     @field_validator('amt')
@@ -66,8 +66,8 @@ class TransactionModel(BaseModel):
     def validate_amount(cls, v):
         if v <= 0:
             raise ValueError('Amount must be positive')
-        if v > 1000000:
-            raise ValueError('Amount exceeds maximum allowed (1,000,000)')
+        if v > 100000000:  # Up to 100 million VND
+            raise ValueError('Amount exceeds maximum allowed (100,000,000)')
         return v
 
     class Config:
@@ -323,52 +323,52 @@ def test():
             "name": "Legitimate Transaction",
             "data": {
                 "trans_date_trans_time": "2024-01-15 10:30:00",
-                "cc_num": "1234567890123456",
-                "merchant": "Amazon",
-                "category": "shopping_net",
-                "amt": 50.0,
-                "first": "John",
-                "last": "Doe",
+                "cc_num": "9704360000000000",
+                "merchant": "VinMart",
+                "category": "grocery_pos",
+                "amt": 500000.0,
+                "first": "Nguyễn",
+                "last": "Văn An",
                 "gender": "M",
-                "street": "123 Main St",
-                "city": "New York",
-                "state": "NY",
-                "zip": "10001",
-                "lat": 40.7128,
-                "long": -74.0060,
+                "street": "123 Nguyễn Huệ",
+                "city": "Hà Nội",
+                "state": "HN",
+                "zip": "100000",
+                "lat": 21.0285,
+                "long": 105.8542,
                 "city_pop": 8000000,
-                "job": "Software Engineer",
+                "job": "Kỹ sư phần mềm",
                 "dob": "1990-01-01",
                 "trans_num": "test123",
                 "unix_time": 1705315800,
-                "merch_lat": 40.7580,
-                "merch_long": -73.9855
+                "merch_lat": 21.0285,
+                "merch_long": 105.8542
             }
         },
         {
             "name": "Suspicious Transaction",
             "data": {
                 "trans_date_trans_time": "2024-01-15 03:00:00",
-                "cc_num": "1234567890123456",
+                "cc_num": "9704360000000000",
                 "merchant": "Unknown Store",
                 "category": "misc_net",
-                "amt": 9999.0,
-                "first": "John",
-                "last": "Doe",
+                "amt": 50000000.0,
+                "first": "Nguyễn",
+                "last": "Văn An",
                 "gender": "M",
-                "street": "123 Main St",
-                "city": "New York",
-                "state": "NY",
-                "zip": "10001",
-                "lat": 40.7128,
-                "long": -74.0060,
+                "street": "123 Nguyễn Huệ",
+                "city": "Hà Nội",
+                "state": "HN",
+                "zip": "100000",
+                "lat": 21.0285,
+                "long": 105.8542,
                 "city_pop": 8000000,
-                "job": "Software Engineer",
+                "job": "Kỹ sư phần mềm",
                 "dob": "1990-01-01",
                 "trans_num": "test456",
                 "unix_time": 1705294800,
-                "merch_lat": 34.0522,
-                "merch_long": -118.2437
+                "merch_lat": 10.8231,
+                "merch_long": 106.6297
             }
         }
     ]
